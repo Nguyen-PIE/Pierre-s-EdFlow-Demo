@@ -1,15 +1,26 @@
 import { useState } from 'react';
+import { useNavigate } from 'react-router-dom';
 
-export default function AuthPage() {
+export default function AuthPage({ setUser }) {
   const [role, setRole] = useState('student');
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
   const [isLogin, setIsLogin] = useState(true);
+  const navigate = useNavigate();
 
   const handleSubmit = () => {
     console.log('Auth attempt:', { role, email, password, isLogin });
-    // We'll add Firebase auth later
+    
+    // Set user and navigate based on role
+    setUser({ email, role });
+    
+    if (role === 'student') {
+      navigate('/student/classes');
+    } else if (role === 'teacher') {
+      navigate('/teacher/dashboard'); // We'll create this later
+    }
   };
+
 
   return (
     <div className="min-h-screen relative overflow-hidden flex items-center justify-center p-4">
