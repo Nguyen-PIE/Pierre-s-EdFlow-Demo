@@ -1,4 +1,4 @@
-import { BrowserRouter, Routes, Route, Navigate } from 'react-router-dom';
+import { HashRouter, Routes, Route, Navigate } from 'react-router-dom';
 import { useState, useEffect } from 'react';
 import AuthPage from './components/AuthPage';
 import StudentClassSelect from './components/StudentClassSelect';
@@ -26,7 +26,7 @@ function App() {
   }, [user]);
 
   return (
-    <BrowserRouter>
+    <HashRouter>
       <Routes>
         <Route 
           path="/" 
@@ -57,11 +57,11 @@ function App() {
           element={user?.role === 'teacher' ? <TeacherDashboard /> : <Navigate to="/" />} 
         />
         <Route 
-        path="/teacher/quiz-builder/:classId" 
-        element={user?.role === 'teacher' ? <TeacherQuizBuilder /> : <Navigate to="/" />} 
+          path="/teacher/quiz-builder/:classId" 
+          element={user?.role === 'teacher' ? <TeacherQuizBuilder /> : <Navigate to="/" />} 
         />
       </Routes>
-    </BrowserRouter>
+    </HashRouter>
   );
 }
 
