@@ -5,7 +5,7 @@ import StudentClassSelect from './components/StudentClassSelect';
 import StudentSubjectDashboard from './components/StudentSubjectDashboard';
 import QuizTakingPage from './components/QuizTakingPage';
 import QuizResultsPage from './components/QuizResultsPage';
-
+import TeacherDashboard from './components/TeacherDashboard';
 
 function App() {
   const [user, setUser] = useState(() => {
@@ -30,6 +30,8 @@ function App() {
           path="/" 
           element={<AuthPage setUser={setUser} />} 
         />
+        
+        {/* Student Routes */}
         <Route 
           path="/student/classes" 
           element={user?.role === 'student' ? <StudentClassSelect /> : <Navigate to="/" />} 
@@ -43,8 +45,14 @@ function App() {
           element={user?.role === 'student' ? <QuizTakingPage /> : <Navigate to="/" />} 
         />
         <Route 
-        path="/student/quiz-results/:quizId" 
-        element={user?.role === 'student' ? <QuizResultsPage /> : <Navigate to="/" />} 
+          path="/student/quiz-results/:quizId" 
+          element={user?.role === 'student' ? <QuizResultsPage /> : <Navigate to="/" />} 
+        />
+
+        {/* Teacher Routes */}
+        <Route 
+          path="/teacher/dashboard" 
+          element={user?.role === 'teacher' ? <TeacherDashboard /> : <Navigate to="/" />} 
         />
       </Routes>
     </BrowserRouter>
