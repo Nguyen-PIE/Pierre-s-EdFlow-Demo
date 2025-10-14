@@ -1,11 +1,15 @@
-import { useState } from 'react';
-import { useNavigate } from 'react-router-dom';
-
+import { useState, useEffect } from 'react';
+import { useNavigate, useParams } from 'react-router-dom';
+import { saveQuizAttempt, flagQuestionForTeacher } from '../firebase/database';
 
 export default function QuizResultsPage() {
   const [flaggedForTeacher, setFlaggedForTeacher] = useState([]);
-	const navigate = useNavigate();
+  const [saving, setSaving] = useState(false);
+  const navigate = useNavigate();
+  const { quizId } = useParams();
 
+  // Get user from localStorage
+  const user = JSON.parse(localStorage.getItem('user'));
 
   // Sample results data - this would come from the quiz
   const quizResults = {
@@ -16,11 +20,6 @@ export default function QuizResultsPage() {
     timeSpent: '12:34',
     completedDate: new Date().toLocaleDateString()
   };
-
-
-	const handleReturnToDashboard = () => {
-			navigate('/student/subject/2');
-	};
 
   const questionResults = [
     {
@@ -90,11 +89,68 @@ export default function QuizResultsPage() {
     }
   ];
 
-  const toggleFlag = (questionId) => {
+  const handleReturnToDashboard = () => {
+    navigate('/student/subject/2');
+  };
+
+  // Save quiz attempt to database when component loads
+  useEffect(() => {
+    const saveAttempt = async () => {
+      const attemptData = {
+        quizId: quizId,
+        studentId: user.uid,
+        studentEmail: user.email,
+        classId: '1', // Business Studies class
+        score: quizResults.score,
+        correctAnswers: quizResults.correctAnswers,
+        totalQuestions: quizResults.totalQuestions,
+        timeSpent: quizResults.timeSpent,
+        answers: questionResults.map(q => ({
+          questionId: q.id,
+          userAnswer: q.userAnswer,
+          isCorrect: q.isCorrect
+        }))
+      };
+
+      const { error } = await saveQuizAttempt(attemptData);
+      if (error) {
+        console.error('Error saving attempt:', error);
+      }
+    };
+
+    if (user) {
+      saveAttempt();
+    }
+  }, []);
+
+  const toggleFlag = async (questionId) => {
     if (flaggedForTeacher.includes(questionId)) {
+      // Remove flag
       setFlaggedForTeacher(flaggedForTeacher.filter(id => id !== questionId));
     } else {
+      // Add flag
       setFlaggedForTeacher([...flaggedForTeacher, questionId]);
+      
+      // Save to database
+      setSaving(true);
+      const flagData = {
+        quizId: quizId,
+        questionId: questionId,
+        studentId: user.uid,
+        studentEmail: user.email,
+        classId: '1', // Business Studies class
+        questionText: questionResults.find(q => q.id === questionId)?.question,
+        studentAnswer: questionResults.find(q => q.id === questionId)?.userAnswer
+      };
+
+      const { error } = await flagQuestionForTeacher(flagData);
+      setSaving(false);
+      
+      if (error) {
+        console.error('Error flagging question:', error);
+        alert('Failed to flag question. Please try again.');
+        setFlaggedForTeacher(flaggedForTeacher.filter(id => id !== questionId));
+      }
     }
   };
 
@@ -177,13 +233,14 @@ export default function QuizResultsPage() {
                   </div>
                   <button
                     onClick={() => toggleFlag(result.id)}
+                    disabled={saving}
                     className={`ml-4 px-4 py-2 rounded-lg font-semibold transition-all ${
                       flaggedForTeacher.includes(result.id)
                         ? 'bg-yellow-500 text-white hover:bg-yellow-600'
                         : 'bg-gray-200 text-gray-700 hover:bg-gray-300'
-                    }`}
+                    } disabled:opacity-50 disabled:cursor-not-allowed`}
                   >
-                    {flaggedForTeacher.includes(result.id) ? 'Flagged for Teacher' : 'Flag with Teacher'}
+                    {saving ? 'Saving...' : flaggedForTeacher.includes(result.id) ? 'Flagged for Teacher' : 'Flag with Teacher'}
                   </button>
                 </div>
 
@@ -248,9 +305,12 @@ export default function QuizResultsPage() {
 
         {/* Action Buttons */}
         <div className="flex gap-4 pb-12">
-				<button onClick={handleReturnToDashboard} className="flex-1 bg-purple-600 hover:bg-purple-700 text-white px-8 py-4 rounded-lg font-semibold transition-all shadow-lg hover:shadow-xl">
-					Return to Dashboard
-				</button>
+          <button 
+            onClick={handleReturnToDashboard} 
+            className="flex-1 bg-purple-600 hover:bg-purple-700 text-white px-8 py-4 rounded-lg font-semibold transition-all shadow-lg hover:shadow-xl"
+          >
+            Return to Dashboard
+          </button>
           <button className="flex-1 bg-gray-600 hover:bg-gray-700 text-white px-8 py-4 rounded-lg font-semibold transition-all">
             Review Mistakes
           </button>
