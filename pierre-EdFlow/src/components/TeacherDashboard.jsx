@@ -9,6 +9,10 @@ export default function TeacherClassManage() {
 	const navigate = useNavigate();
 
 
+	const handleCreateQuiz = () => {
+		navigate('/teacher/quiz-builder/1');
+	};
+
 	const handleLogout = () => {
     localStorage.removeItem('user');
     navigate('/');
@@ -159,7 +163,7 @@ export default function TeacherClassManage() {
       {/* Create Quiz Modal */}
       {showCreateQuiz && (
         <div className="fixed inset-0 bg-black/50 flex items-center justify-center z-50 p-4 overflow-y-auto">
-          <div className="bg-white rounded-2xl shadow-2xl max-w-4xl w-full p-8 my-8">
+					<div className="bg-white rounded-2xl shadow-2xl max-w-2xl w-full p-6 my-6 max-h-[90vh] overflow-y-auto">
             <div className="flex justify-between items-center mb-6">
               <h2 className="text-3xl font-bold text-gray-800">Create New Quiz</h2>
               <button

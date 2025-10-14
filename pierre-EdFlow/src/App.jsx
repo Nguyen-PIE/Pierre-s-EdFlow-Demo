@@ -6,6 +6,8 @@ import StudentSubjectDashboard from './components/StudentSubjectDashboard';
 import QuizTakingPage from './components/QuizTakingPage';
 import QuizResultsPage from './components/QuizResultsPage';
 import TeacherDashboard from './components/TeacherDashboard';
+import TeacherQuizBuilder from './components/TeacherQuizBuilder';
+
 
 function App() {
   const [user, setUser] = useState(() => {
@@ -53,6 +55,10 @@ function App() {
         <Route 
           path="/teacher/dashboard" 
           element={user?.role === 'teacher' ? <TeacherDashboard /> : <Navigate to="/" />} 
+        />
+        <Route 
+        path="/teacher/quiz-builder/:classId" 
+        element={user?.role === 'teacher' ? <TeacherQuizBuilder /> : <Navigate to="/" />} 
         />
       </Routes>
     </BrowserRouter>
